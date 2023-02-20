@@ -17,7 +17,7 @@ class SelectedDayBox extends StatelessWidget {
         () {
           return Text(
             DateFormat("EEEE, MMM dd, y").format(calendarController.selectedDay.value),
-            style: TextStyle(fontFamily: "FiraCode", fontSize: 16.0, color: primaryColor),
+            style: const TextStyle(fontFamily: "FiraCode", fontSize: 16.0, color: primaryColor),
           );
         },
       ),

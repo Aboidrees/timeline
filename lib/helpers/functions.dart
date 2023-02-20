@@ -17,10 +17,10 @@ Map<DateTime, List<dynamic>> decodePeriods(Map<String, dynamic> periods) {
 
 dynamic checkPeriodOverlapping(List selectedPeriods, DateTime startTime, DateTime endTime) {
   for (int i = 0; i < selectedPeriods.length; i++) {
-    DateTime __startTime = DateTime.parse(selectedPeriods[i]['start']);
-    DateTime __endTime = DateTime.parse(selectedPeriods[i]['end']);
-    if ((startTime.isAfter(__startTime) && startTime.isBefore(__endTime)) || (endTime.isAfter(__startTime) && endTime.isBefore(__endTime))) {
-      return {'start': __startTime, 'end': __endTime};
+    DateTime startTime0 = DateTime.parse(selectedPeriods[i]['start']);
+    DateTime endTime0 = DateTime.parse(selectedPeriods[i]['end']);
+    if ((startTime.isAfter(startTime0) && startTime.isBefore(endTime0)) || (endTime.isAfter(startTime0) && endTime.isBefore(endTime0))) {
+      return {'start': startTime0, 'end': endTime0};
     }
   }
   return null;
@@ -29,20 +29,20 @@ dynamic checkPeriodOverlapping(List selectedPeriods, DateTime startTime, DateTim
 class ErrorMessage extends StatelessWidget {
   final String message;
 
-  ErrorMessage(this.message);
+  const ErrorMessage(this.message, {super.key});
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
       //title: Text('Alert'),
 
-      content: Container(
+      content: SizedBox(
         height: SizeConfig.screenHeight / 12,
         child: Center(child: Text(message, textAlign: TextAlign.center)),
       ),
       actions: <Widget>[
         // usually buttons at the bottom of the dialog
-        TextButton(child: Icon(Icons.close, color: primaryColor), onPressed: () => Navigator.of(context).pop()),
+        TextButton(child: const Icon(Icons.close, color: primaryColor), onPressed: () => Navigator.of(context).pop()),
       ],
     );
   }

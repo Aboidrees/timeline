@@ -10,8 +10,7 @@ import 'package:timeline/helpers/size_config.dart';
 import 'package:timeline/screens/widgets/day_builder.dart';
 
 class CalendarBoxWidget extends StatefulWidget {
-  const CalendarBoxWidget({super.key, required this.periods});
-  final Map<DateTime, List<dynamic>> periods;
+  const CalendarBoxWidget({super.key});
 
   @override
   State<CalendarBoxWidget> createState() => _CalendarBoxWidgetState();
@@ -22,11 +21,12 @@ class _CalendarBoxWidgetState extends State<CalendarBoxWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final calendarController = Get.put(CalendarController());
-    final eventsController = Get.put(EventsController());
+    final calendarController = Get.find<CalendarController>();
+    final eventsController = Get.find<EventsController>();
     return Expanded(
       child: Container(
         alignment: Alignment.center,
+        padding: const EdgeInsets.all(0),
         child: Obx(
           () => TableCalendar(
             firstDay: DateTime(2023),
@@ -34,7 +34,7 @@ class _CalendarBoxWidgetState extends State<CalendarBoxWidget> {
             focusedDay: calendarController.focusedDay.value,
             selectedDayPredicate: (day) => isSameDay(calendarController.selectedDay.value, day),
             onDaySelected: calendarController.onDaySelected,
-            availableCalendarFormats: {CalendarFormat.month: "Month"},
+            availableCalendarFormats: const {CalendarFormat.month: "Month"},
             onFormatChanged: calendarController.onFormatChanged,
             onPageChanged: calendarController.setFocusedDay,
             headerStyle: HeaderStyle(
@@ -56,14 +56,14 @@ class _CalendarBoxWidgetState extends State<CalendarBoxWidget> {
                   return Container(
                     width: SizeConfig.defaultSize * 1.8,
                     height: SizeConfig.defaultSize * 1.8,
-                    child: Center(child: Text(events.length.toString(), style: TextStyle(color: Colors.white))),
                     decoration: BoxDecoration(color: Colors.red, borderRadius: BorderRadius.circular(SizeConfig.defaultSize)),
+                    child: Center(child: Text(events.length.toString(), style: const TextStyle(color: Colors.white))),
                   );
                 }
                 return null;
               },
             ),
-            eventLoader: eventsController.loadEvents,
+            eventLoader: eventsController.loadDayEvents,
           ),
         ),
       ),

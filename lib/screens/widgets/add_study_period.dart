@@ -39,10 +39,10 @@ class _AddPeriodState extends State<AddPeriod> {
   @override
   Widget build(BuildContext context) {
     double defaultSize = SizeConfig.defaultSize;
-    double _timePickerWidth = (SizeConfig.screenWidth / 2) - defaultSize * 5;
+    double timePickerWidth = (SizeConfig.screenWidth / 2) - defaultSize * 5;
 
     return Container(
-      color: Color(0xFF757575),
+      color: const Color(0xFF757575),
       child: Container(
         padding: EdgeInsets.all(defaultSize * 3),
         decoration: BoxDecoration(
@@ -53,7 +53,7 @@ class _AddPeriodState extends State<AddPeriod> {
             colors: [Colors.white, Colors.grey.shade100, Colors.white],
           ),
           borderRadius: BorderRadius.only(topLeft: Radius.circular(defaultSize * 4), topRight: Radius.circular(defaultSize * 4)),
-          boxShadow: [BoxShadow(blurRadius: 5.0, color: Colors.black54)],
+          boxShadow: const [BoxShadow(blurRadius: 5.0, color: Colors.black54)],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -71,7 +71,7 @@ class _AddPeriodState extends State<AddPeriod> {
               children: [
                 SizedBox(
                   height: defaultSize * 10,
-                  width: _timePickerWidth,
+                  width: timePickerWidth,
                   child: CupertinoDatePicker(
                     initialDateTime: DateTime.now(),
                     mode: CupertinoDatePickerMode.time,
@@ -80,7 +80,7 @@ class _AddPeriodState extends State<AddPeriod> {
                 ),
                 SizedBox(
                   height: defaultSize * 10,
-                  width: _timePickerWidth,
+                  width: timePickerWidth,
                   child: CupertinoDatePicker(
                     initialDateTime: _end,
                     minimumDate: _start,
@@ -152,7 +152,7 @@ class _AddPeriodState extends State<AddPeriod> {
 
                 Navigator.pop(context, studyPeriod);
               },
-              child: Text('Add', style: TextStyle(color: Colors.white)),
+              child: const Text('Add', style: TextStyle(color: Colors.white)),
             ),
           ],
         ),

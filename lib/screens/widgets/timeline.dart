@@ -1,21 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:timeline/helpers/size_config.dart';
 
 class DayTimeline extends StatelessWidget {
-  DayTimeline({this.periods});
-
-  final List<dynamic>? periods;
+  const DayTimeline({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return periods == null
-        ? Container(
-            width: double.infinity,
-            height: double.infinity,
-            color: Colors.yellowAccent,
-            child: Text('No Data'),
-          )
-        : SingleChildScrollView(child: Container()
+    return
+        // periods == null
+        //     ? Container(
+        //         width: double.infinity,
+        //         height: double.infinity,
+        //         color: Colors.yellowAccent,
+        //         child: const Text('No Data'),
+        //       )
+        //     :
+        SingleChildScrollView(child: Container()
 
             /*    FixedTimeline.tileBuilder(
               theme: TimelineThemeData(color: primaryColor, nodePosition: 0.2, indicatorPosition: 0.0),

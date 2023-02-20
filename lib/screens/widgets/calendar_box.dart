@@ -4,9 +4,7 @@ import 'package:timeline/screens/widgets/selected_day_box.dart';
 import 'package:timeline/screens/widgets/today_box.dart';
 
 class CalendarWidget extends StatelessWidget {
-  const CalendarWidget({super.key, required this.periods});
-
-  final Map<DateTime, List<dynamic>> periods;
+  const CalendarWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -16,9 +14,9 @@ class CalendarWidget extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           mainAxisSize: MainAxisSize.min,
-          children: [
+          children: const [
             ToDayBox(),
-            CalendarBoxWidget(periods: periods),
+            CalendarBoxWidget(),
           ],
         ),
         SelectedDayBox(),

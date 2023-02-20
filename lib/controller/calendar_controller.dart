@@ -3,9 +3,9 @@ import 'package:get/get_state_manager/get_state_manager.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class CalendarController extends GetxController {
-  Rx<DateTime> _selectedDay = DateTime.now().obs;
-  Rx<DateTime> _focusedDay = DateTime.now().obs;
-  Rx<CalendarFormat> _calendarFormat = CalendarFormat.month.obs;
+  final Rx<DateTime> _selectedDay = DateTime.now().obs;
+  final Rx<DateTime> _focusedDay = DateTime.now().obs;
+  final Rx<CalendarFormat> _calendarFormat = CalendarFormat.month.obs;
 
   Rx<CalendarFormat> get calendarFormat => _calendarFormat;
   Rx<DateTime> get selectedDay => _selectedDay;
