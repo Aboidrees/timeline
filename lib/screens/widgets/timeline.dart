@@ -1,66 +1,84 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:intl/intl.dart';
+import 'package:timeline/controller/calendar_controller.dart';
+import 'package:timeline/controller/events_controller.dart';
+import 'package:timeline/helpers/const.dart';
 import 'package:timeline/helpers/size_config.dart';
+import 'package:timelines/timelines.dart';
 
 class DayTimeline extends StatelessWidget {
-  DayTimeline({this.periods});
-
-  final List<dynamic>? periods;
+  const DayTimeline({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return periods == null
-        ? Container(
-            width: double.infinity,
-            height: double.infinity,
-            color: Colors.yellowAccent,
-            child: Text('No Data'),
-          )
-        : SingleChildScrollView(child: Container()
+    final calendarController = Get.put(CalendarController());
+    final eventsController = Get.find<EventsController>();
 
-            /*    FixedTimeline.tileBuilder(
-              theme: TimelineThemeData(color: primaryColor, nodePosition: 0.2, indicatorPosition: 0.0),
-              builder: TimelineTileBuilder.connectedFromStyle(
-                oppositeContentsBuilder: (context, index) => Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text(
-                        "${DateTime.parse(periods![index]['start']).hour.toString().padLeft(2, '0')}:${DateTime.parse(periods![index]['start']).minute.toString().padLeft(2, '0')}",
-                        style: TextStyle(fontFamily: 'FiraCode', fontWeight: FontWeight.bold, fontSize: defaultSize * 1.6),
-                      ),
-                      Icon(Icons.keyboard_arrow_down_rounded),
-                      Text(
-                        "${DateTime.parse(periods![index]['end']).hour.toString().padLeft(2, '0')}:${DateTime.parse(periods![index]['end']).minute.toString().padLeft(2, '0')}",
-                        style: TextStyle(fontFamily: 'FiraCode', fontWeight: FontWeight.bold, fontSize: defaultSize * 1.6),
-                      ),
-                    ],
-                  ),
+    final selectedDay = DateFormat("yyyy-MM-dd").format(calendarController.selectedDay.value);
+
+    final dayEvents = eventsController.events[selectedDay] ?? [];
+
+    SizeConfig().init(context);
+    final double defaultSize = SizeConfig.defaultSize;
+
+    return SingleChildScrollView(
+      child: FixedTimeline.tileBuilder(
+        theme: TimelineThemeData(
+          color: primaryColor,
+          nodePosition: 0.2,
+          indicatorPosition: 1,
+        ),
+        builder: TimelineTileBuilder.connectedFromStyle(
+          oppositeContentsBuilder: (context, index) => Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  DateFormat("hh:mm").format(dayEvents[index].start),
+                  style: TextStyle(fontFamily: 'FiraCode', fontWeight: FontWeight.bold, fontSize: defaultSize * 1.6),
                 ),
-                contentsBuilder: (context, index) => Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          periods![index]['periodTitle'],
-                          style: TextStyle(fontWeight: FontWeight.bold, color: primaryColor, fontSize: defaultSize * 2, letterSpacing: 0.5),
-                        ),
-                        SizedBox(height: defaultSize),
-                        Text(periods![index]['desc']),
-                      ],
-                    ),
-                  ),
+                const Icon(Icons.keyboard_arrow_down_rounded),
+                Text(
+                  DateFormat("hh:mm").format(dayEvents[index].end),
+                  style: TextStyle(fontFamily: 'FiraCode', fontWeight: FontWeight.bold, fontSize: defaultSize * 1.6),
                 ),
-                connectorStyleBuilder: (context, index) => (index % 2 == 1) ? ConnectorStyle.dashedLine : ConnectorStyle.solidLine,
-                indicatorStyleBuilder: (context, index) => IndicatorStyle.outlined,
-                itemCount: periods?.length ?? 0,
+              ],
+            ),
+          ),
+          contentsBuilder: (context, index) => Card(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(dayEvents[index].title, style: Theme.of(context).textTheme.titleMedium),
+                  SizedBox(height: defaultSize),
+                  Text(dayEvents[index].description),
+                ],
               ),
             ),
-          */
-            );
+          ),
+          connectorStyleBuilder: (_, index) => calcConnectorStyle(index, dayEvents.length),
+          indicatorStyleBuilder: (context, index) => calcIndicatorStyle(index, dayEvents.length),
+          itemCount: dayEvents.length,
+        ),
+      ),
+    );
+  }
+
+  ConnectorStyle calcConnectorStyle(int index, eventsCount) {
+    return (index >= eventsCount - 1)
+        ? ConnectorStyle.transparent
+        : (index % 2 == 1)
+            ? ConnectorStyle.dashedLine
+            : ConnectorStyle.solidLine;
+  }
+
+  IndicatorStyle calcIndicatorStyle(int index, eventsCount) {
+    return (index % 2 == 1) ? IndicatorStyle.outlined : IndicatorStyle.dot;
   }
 }

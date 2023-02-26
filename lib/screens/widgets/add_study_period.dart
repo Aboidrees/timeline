@@ -1,20 +1,21 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:timeline/helpers/const.dart';
+import 'package:get/get.dart';
+import 'package:intl/intl.dart';
+import 'package:timeline/controller/calendar_controller.dart';
+import 'package:timeline/controller/events_controller.dart';
+import 'package:timeline/features/events/data/event_model.dart';
 import 'package:timeline/helpers/functions.dart';
 import 'package:timeline/helpers/size_config.dart';
 
 class AddPeriod extends StatefulWidget {
-  const AddPeriod({super.key, required this.selectedDay, required this.selectedPeriods});
-
-  final DateTime selectedDay;
-  final List<dynamic> selectedPeriods;
+  const AddPeriod({super.key});
 
   @override
-  _AddPeriodState createState() => _AddPeriodState();
+  AddPeriodState createState() => AddPeriodState();
 }
 
-class _AddPeriodState extends State<AddPeriod> {
+class AddPeriodState extends State<AddPeriod> {
   // Title Controller
   late TextEditingController _title;
   late TextEditingController _description;
@@ -39,21 +40,21 @@ class _AddPeriodState extends State<AddPeriod> {
   @override
   Widget build(BuildContext context) {
     double defaultSize = SizeConfig.defaultSize;
-    double _timePickerWidth = (SizeConfig.screenWidth / 2) - defaultSize * 5;
+    double timePickerWidth = (SizeConfig.screenWidth / 2) - defaultSize * 5;
 
-    return Container(
-      color: Color(0xFF757575),
+    final calendarController = Get.find<CalendarController>();
+    final eventsController = Get.find<EventsController>();
+    final selectedDayEvents = eventsController.events[DateFormat('yyyy-MM-dd').format(calendarController.selectedDay.value)] ?? <Event>[];
+
+    return ClipRRect(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(defaultSize * 3)),
       child: Container(
+        height: MediaQuery.of(context).size.height * 0.80,
         padding: EdgeInsets.all(defaultSize * 3),
         decoration: BoxDecoration(
           color: Colors.white,
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Colors.white, Colors.grey.shade100, Colors.white],
-          ),
-          borderRadius: BorderRadius.only(topLeft: Radius.circular(defaultSize * 4), topRight: Radius.circular(defaultSize * 4)),
-          boxShadow: [BoxShadow(blurRadius: 5.0, color: Colors.black54)],
+          borderRadius: BorderRadius.vertical(top: Radius.circular(defaultSize * 3)),
+          boxShadow: const [BoxShadow(blurRadius: 5.0, color: Colors.black54)],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -62,16 +63,17 @@ class _AddPeriodState extends State<AddPeriod> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                Text('Start Time', style: TextStyle(fontSize: defaultSize * 2, color: primaryColor)),
-                Text('End Time', style: TextStyle(fontSize: defaultSize * 2, color: primaryColor)),
+                Text('Start Time', style: Theme.of(context).textTheme.titleMedium),
+                Text('End Time', style: Theme.of(context).textTheme.titleMedium),
               ],
             ),
+            SizedBox(height: defaultSize * 2),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 SizedBox(
-                  height: defaultSize * 10,
-                  width: _timePickerWidth,
+                  height: defaultSize * 15,
+                  width: timePickerWidth,
                   child: CupertinoDatePicker(
                     initialDateTime: DateTime.now(),
                     mode: CupertinoDatePickerMode.time,
@@ -79,8 +81,8 @@ class _AddPeriodState extends State<AddPeriod> {
                   ),
                 ),
                 SizedBox(
-                  height: defaultSize * 10,
-                  width: _timePickerWidth,
+                  height: defaultSize * 15,
+                  width: timePickerWidth,
                   child: CupertinoDatePicker(
                     initialDateTime: _end,
                     minimumDate: _start,
@@ -90,69 +92,69 @@ class _AddPeriodState extends State<AddPeriod> {
                 ),
               ],
             ),
-            SizedBox(height: defaultSize * 2.5),
+            SizedBox(height: defaultSize * 2),
             TextFormField(
               controller: _title,
               validator: (value) => (value == null || value.isEmpty) ? "Please Enter title" : null,
-              style: TextStyle(fontFamily: 'Montserrat', fontSize: defaultSize * 1.8),
-              decoration: InputDecoration(
-                labelText: "Title",
-                filled: true,
-                fillColor: Colors.white,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(defaultSize)),
-              ),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontFamily: "Montserrat"),
+              decoration: const InputDecoration(labelText: "Title", filled: true, fillColor: Colors.white),
             ),
-            SizedBox(height: defaultSize * 2.5),
+            SizedBox(height: defaultSize * 2),
             TextFormField(
               controller: _description,
               minLines: 3,
-              maxLines: 5,
+              maxLines: 8,
               validator: (value) => (value == null || value.isEmpty) ? "Please Enter description" : null,
-              style: TextStyle(fontFamily: 'Montserrat', fontSize: defaultSize * 1.8),
-              decoration: InputDecoration(labelText: "Description", border: OutlineInputBorder(borderRadius: BorderRadius.circular(defaultSize))),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontFamily: "Montserrat"),
+              decoration: const InputDecoration(labelText: "Description"),
             ),
             SizedBox(height: defaultSize * 2),
 
             // ignore: deprecated_member_use
             ElevatedButton(
               onPressed: () {
-                var checkResult = checkPeriodOverlapping(widget.selectedPeriods, _start, _end);
+                var checkResult = checkPeriodOverlapping(selectedDayEvents, _start, _end);
 
                 if (checkResult != null) {
                   showDialog(
                     context: context,
                     builder: (BuildContext context) => ErrorMessage(
-                        'The selected period is overlapping with ${checkResult['start'].hour.toString().padLeft(2, '0')}:${checkResult['start'].minute.toString().padLeft(2, '0')}   to   ${checkResult['end'].hour.toString().padLeft(2, '0')}:${checkResult['end'].minute.toString().padLeft(2, '0')}'),
+                      message: 'The selected period is overlapping'
+                          ' with ${DateFormat("HH:mm").format(checkResult.start)}   '
+                          ' to   ${DateFormat("HH:mm").format(checkResult.end)}     ',
+                    ),
                   );
                   return;
                 }
 
                 if (DateTimeRange(start: _start, end: _end).duration.inMinutes < 1) {
-                  showDialog(context: context, builder: (BuildContext context) => ErrorMessage('Start time is less than End time'));
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) => const ErrorMessage(message: 'Start time is less than End time'),
+                  );
                   return;
                 }
 
                 if (_title.text.isEmpty) {
-                  showDialog(context: context, builder: (BuildContext context) => ErrorMessage('period title should not be empty'));
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) => const ErrorMessage(message: 'period title should not be empty'),
+                  );
                   return;
                 }
 
                 if (_description.text.isEmpty) {
-                  showDialog(context: context, builder: (BuildContext context) => ErrorMessage('period desc should not be empty'));
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) => const ErrorMessage(message: 'period desc should not be empty'),
+                  );
                   return;
                 }
                 // return false;
 
-                Map<String, dynamic> studyPeriod = {
-                  "title": _title.text,
-                  "start": _start.toIso8601String(),
-                  "end": _end.toIso8601String(),
-                  "description": _description.text,
-                };
-
-                Navigator.pop(context, studyPeriod);
+                Navigator.pop<Event>(context, Event(0, _title.text, _description.text, _start, _end));
               },
-              child: Text('Add', style: TextStyle(color: Colors.white)),
+              child: const Text('Add', style: TextStyle(color: Colors.white)),
             ),
           ],
         ),

@@ -1,117 +1,92 @@
-import 'dart:convert';
-
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:realm/realm.dart';
+import 'package:timeline/controller/events_controller.dart';
+import 'package:timeline/features/events/data/event_model.dart';
 import 'package:timeline/helpers/size_config.dart';
 import 'package:timeline/screens/widgets/add_study_period.dart';
-import 'package:timeline/screens/widgets/calendar_box.dart';
-import 'package:timeline/screens/widgets/time_line_box_widgte.dart';
+import 'package:timeline/screens/widgets/calendar_box_widget.dart';
+import 'package:timeline/screens/widgets/selected_day_box.dart';
+import 'package:timeline/screens/widgets/time_line_box_widget.dart';
+import 'package:timeline/screens/widgets/today_box.dart';
 
-import '../helpers/functions.dart';
-import '../main.dart';
+class ListBloc {
+  final RealmResults<Event> events;
+  final Realm _realm;
+  final Map<String, List<Event>> distributedEvents = {};
 
-class HomePage extends StatefulWidget {
-  HomePage({super.key});
+  ListBloc(this.events) : _realm = events.realm;
 
-  @override
-  _HomePageState createState() => _HomePageState();
+  void addNewEvent(Event event) {
+    _realm.write(
+      () => _realm.add(Event(
+        1 + (events.lastOrNull?.id ?? 0),
+        event.title,
+        event.description,
+        event.start,
+        event.end,
+      )),
+    );
+  }
 }
 
-class _HomePageState extends State<HomePage> {
-  late Map<DateTime, List<dynamic>> _allPeriods;
-  late List<dynamic> _selectedDayPeriods;
-  late DateTime _selectedDay;
+class HomePage extends StatelessWidget {
+  const HomePage({super.key, required this.bloc});
 
-  @override
-  void initState() {
-    super.initState();
-    _selectedDayPeriods = [];
-    _allPeriods = Map<DateTime, List<dynamic>>();
-    _selectedDay = DateTime.now();
-    _initPrefs();
-  }
-
-  void _initPrefs() async {
-    setState(() {
-      _allPeriods = Map<DateTime, List<dynamic>>.from(decodePeriods(json.decode(prefs.getString("periods") ?? "{}")));
-    });
-  }
+  final ListBloc bloc;
 
   @override
   Widget build(BuildContext context) {
     SizeConfig().init(context);
-    _selectedDayPeriods.sort((a, b) => DateTime.parse(a['start']).compareTo(DateTime.parse(b['start'])));
+    // _selectedDayPeriods.sort((a, b) => DateTime.parse(a['start']).compareTo(DateTime.parse(b['start'])));
+    final eventsController = Get.put(EventsController());
 
     return Scaffold(
-      appBar: AppBar(title: Text("Timeline"), centerTitle: true),
-      body: SafeArea(
-        child: Column(
-          children: [
-            CalendarWidget(periods: _allPeriods),
-            TimeLineBoxWidget(selectedDayPeriods: _selectedDayPeriods),
-          ],
-        ),
-      ),
+      appBar: AppBar(title: const Text("Timeline"), centerTitle: true),
+      body: StreamBuilder<Object>(
+          stream: bloc.events.changes,
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+
+            eventsController.setEvents(bloc.events);
+            return Column(
+              children: [
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const ToDayBox(),
+                        CalendarBoxWidget(events: bloc.events),
+                      ],
+                    ),
+                    SelectedDayBox(),
+                  ],
+                ),
+                const TimeLineBoxWidget(),
+              ],
+            );
+          }),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          final data = await showModalBottomSheet(
+          //
+
+          final Event? newEvent = await showModalBottomSheet(
             context: context,
             isScrollControlled: true,
-            builder: (context) => SingleChildScrollView(
-              child: Container(
-                padding: EdgeInsets.only(bottom: 0),
-                child: AddPeriod(selectedPeriods: _selectedDayPeriods, selectedDay: _selectedDay),
-              ),
-            ),
+            backgroundColor: Colors.transparent,
+            builder: (context) => const AddPeriod(),
           );
 
-          setState(() {
-            // List _listOfDayEvents(DateTime dateTime) {
-            //   if (mySelectedEvents[DateFormat('yyyy-MM-dd').format(dateTime)] != null) {
-            //     return mySelectedEvents[DateFormat('yyyy-MM-dd').format(dateTime)]!;
-            //   } else {
-            //     return [];
-            //   }
-            // }
-//                 setState(() {
-//                   if (mySelectedEvents[
-//                           DateFormat('yyyy-MM-dd').format(_selectedDate!)] !=
-//                       null) {
-//                     mySelectedEvents[
-//                             DateFormat('yyyy-MM-dd').format(_selectedDate!)]
-//                         ?.add({
-//                       "eventTitle": titleController.text,
-//                       "eventDescp": descpController.text,
-//                     });
-//                   } else {
-//                     mySelectedEvents[
-//                         DateFormat('yyyy-MM-dd').format(_selectedDate!)] = [
-//                       {
-//                         "eventTitle": titleController.text,
-//                         "eventDescp": descpController.text,
-//                       }
-//                     ];
-//                   }
-//                 });
-//
-//                 print(
-//                     "New Event for backend developer ${json.encode(mySelectedEvents)}");
-//                 titleController.clear();
-//                 descpController.clear();
-//                 Navigator.pop(context);
-//                 return;
-            if (data != null) {
-              if (_allPeriods.containsKey(_selectedDay)) {
-                _allPeriods[_selectedDay]?.add(data);
-              } else {
-                _allPeriods[_selectedDay] = [data];
-              }
-              prefs.setString('periods', jsonEncode(encodePeriods(_allPeriods)));
-              _selectedDayPeriods = _allPeriods[_selectedDay]!;
-            }
-          });
+          if (newEvent != null) {
+            bloc.addNewEvent(newEvent);
+          }
         },
         tooltip: 'Add a New Studding Period',
-        child: Icon(Icons.add),
+        child: const Icon(Icons.add),
       ),
     );
   }

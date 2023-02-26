@@ -19,11 +19,11 @@ class ToDayBox extends StatelessWidget {
             style: TextStyle(fontFamily: 'FiraCode', fontSize: SizeConfig.defaultSize * 1.8, color: primaryColor),
           ),
           Text(
-            today.day.toString().padLeft(2, '0'),
+            DateFormat("dd").format(today),
             style: TextStyle(fontFamily: 'FiraCode', fontSize: SizeConfig.defaultSize * 7.5, color: primaryColor),
           ),
           Text(
-            '${months[0][today.month - 1]}, ${today.year}',
+            DateFormat("LLL, yyyy").format(today),
             style: TextStyle(fontFamily: 'FiraCode', fontSize: SizeConfig.defaultSize * 1.8, color: primaryColor),
           )
         ],

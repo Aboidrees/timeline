@@ -1,25 +1,30 @@
-import 'package:get/get_state_manager/get_state_manager.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:realm/realm.dart';
+import 'package:timeline/features/events/data/event_model.dart';
 
 class EventsController extends GetxController {
-  Map<String, List<Map<String, String>>> events = {
-    "2023-02-13": [
-      {"title": "11", "description": "111111111111111111"},
-      {"title": "22", "description": "222222222222222222"}
-    ],
-    "2023-02-30": [
-      {"title": "33", "description": "333333333333333333"}
-    ],
-    "2023-02-20": [
-      {"title": "44", "description": "444444444444444444"}
-    ]
-  };
+  final RxMap<String, List<Event>> _events = <String, List<Event>>{}.obs;
 
-  List<Map<String, String>> loadEvents(DateTime day) {
-    if (events.containsKey(DateFormat('yyyy-MM-dd').format(day))) {
-      return events[DateFormat('yyyy-MM-dd').format(day)]!;
+  RxMap<String, List<Event>> get events => _events;
+
+  void setEvents(RealmResults<Event> data) {
+    _events.clear();
+    for (Event event in data) {
+      final dayKey = DateFormat('yyyy-MM-dd').format(event.start);
+      if (_events[dayKey]?.isNotEmpty ?? false) {
+        _events[dayKey]!.add(event);
+      } else {
+        _events[dayKey] = [event];
+      }
+    }
+  }
+
+  List<Event> loadEvents(DateTime day) {
+    if (_events.containsKey(DateFormat('yyyy-MM-dd').format(day))) {
+      return _events[DateFormat('yyyy-MM-dd').format(day)] ?? [];
     } else {
-      return [];
+      return <Event>[];
     }
   }
 }

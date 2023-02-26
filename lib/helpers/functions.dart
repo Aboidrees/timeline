@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:timeline/features/events/data/event_model.dart';
 import 'package:timeline/helpers/const.dart';
 import 'package:timeline/helpers/size_config.dart';
 
@@ -15,12 +16,13 @@ Map<DateTime, List<dynamic>> decodePeriods(Map<String, dynamic> periods) {
   return newPeriod;
 }
 
-dynamic checkPeriodOverlapping(List selectedPeriods, DateTime startTime, DateTime endTime) {
-  for (int i = 0; i < selectedPeriods.length; i++) {
-    DateTime __startTime = DateTime.parse(selectedPeriods[i]['start']);
-    DateTime __endTime = DateTime.parse(selectedPeriods[i]['end']);
-    if ((startTime.isAfter(__startTime) && startTime.isBefore(__endTime)) || (endTime.isAfter(__startTime) && endTime.isBefore(__endTime))) {
-      return {'start': __startTime, 'end': __endTime};
+Event? checkPeriodOverlapping(List<Event> events, DateTime startTime, DateTime endTime) {
+  for (int i = 0; i < events.length; i++) {
+    final event = events[i];
+
+    if ((startTime.isAfter(event.start) && startTime.isBefore(event.end)) ||
+        (endTime.isAfter(event.start) && endTime.isBefore(event.end))) {
+      return event;
     }
   }
   return null;
@@ -29,20 +31,23 @@ dynamic checkPeriodOverlapping(List selectedPeriods, DateTime startTime, DateTim
 class ErrorMessage extends StatelessWidget {
   final String message;
 
-  ErrorMessage(this.message);
+  const ErrorMessage({super.key, required this.message});
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
       //title: Text('Alert'),
 
-      content: Container(
+      content: SizedBox(
         height: SizeConfig.screenHeight / 12,
         child: Center(child: Text(message, textAlign: TextAlign.center)),
       ),
       actions: <Widget>[
         // usually buttons at the bottom of the dialog
-        TextButton(child: Icon(Icons.close, color: primaryColor), onPressed: () => Navigator.of(context).pop()),
+        TextButton(
+          child: const Icon(Icons.close, color: primaryColor),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
       ],
     );
   }
