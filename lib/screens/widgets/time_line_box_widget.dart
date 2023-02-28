@@ -15,9 +15,9 @@ class TimeLineBoxWidget extends StatelessWidget {
           borderRadius: BorderRadius.vertical(top: Radius.circular(SizeConfig.defaultSize * 2)),
           boxShadow: const [BoxShadow(blurRadius: 2.0, color: Colors.black54)],
         ),
-        child: const Padding(
-          padding: EdgeInsets.all(8.0),
-          child: DayTimeline(),
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: DayTimeline(periods: selectedDayPeriods),
         ),
       ),
     );

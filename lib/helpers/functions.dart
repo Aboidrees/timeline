@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:timeline/features/events/data/event_model.dart';
 import 'package:timeline/helpers/const.dart';
 import 'package:timeline/helpers/size_config.dart';
 
@@ -15,12 +16,12 @@ Map<DateTime, List<dynamic>> decodePeriods(Map<String, dynamic> periods) {
   return newPeriod;
 }
 
-dynamic checkPeriodOverlapping(List selectedPeriods, DateTime startTime, DateTime endTime) {
-  for (int i = 0; i < selectedPeriods.length; i++) {
-    DateTime startTime0 = DateTime.parse(selectedPeriods[i]['start']);
-    DateTime endTime0 = DateTime.parse(selectedPeriods[i]['end']);
-    if ((startTime.isAfter(startTime0) && startTime.isBefore(endTime0)) || (endTime.isAfter(startTime0) && endTime.isBefore(endTime0))) {
-      return {'start': startTime0, 'end': endTime0};
+Event? checkPeriodOverlapping(List<Event> events, DateTime startTime, DateTime endTime) {
+  for (int i = 0; i < events.length; i++) {
+    final event = events[i];
+
+    if ((startTime.isAfter(event.start) && startTime.isBefore(event.end)) || (endTime.isAfter(event.start) && endTime.isBefore(event.end))) {
+      return event;
     }
   }
   return null;

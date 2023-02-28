@@ -15,17 +15,8 @@ class DayBuilderWidget extends StatelessWidget {
 
     return Container(
       alignment: Alignment.center,
-      width: dynamicSize * 0.9,
-      height: dynamicSize * 0.9,
-      decoration: BoxDecoration(
-        color: dayType == 'selected' ? primaryColor : Colors.white,
-        border: Border.all(
-          color: dayType == 'today' ? primaryColor : Colors.white,
-          width: dayType == 'today' ? SizeConfig.defaultSize / 3 : 0.0,
-        ),
-        borderRadius: BorderRadius.circular(SizeConfig.defaultSize * 5),
-        boxShadow: const [BoxShadow(blurRadius: 2, spreadRadius: -2, offset: Offset(1, 1))],
-      ),
+      width: dynamicSize,
+      height: dynamicSize,
       child: Text(
         date.day.toString(),
         textWidthBasis: TextWidthBasis.longestLine,

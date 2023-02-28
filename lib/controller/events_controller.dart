@@ -1,28 +1,9 @@
-import 'dart:convert';
-
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:timeline/helpers/functions.dart';
+import 'package:realm/realm.dart';
+import 'package:timeline/features/events/data/event_model.dart';
 
 class EventsController extends GetxController {
-  final SharedPreferences _store;
-  EventsController(SharedPreferences store) : _store = store;
-
-  @override
-  onInit() {
-    super.onInit();
-    loadFromStore();
-  }
-
-  loadFromStore() {
-    final rawData = _store.getString("events") ?? "";
-    final jsonData = json.decode(rawData);
-    final formattedData = Map<String, List<Map<String, String>>>.from(decodePeriods(jsonData));
-
-    events.assignAll(formattedData);
-  }
-
   Map<String, List<Map<String, String>>> events = {
     "2023-02-13": [
       {"title": "11", "description": "111111111111111111"},
@@ -36,11 +17,11 @@ class EventsController extends GetxController {
     ]
   };
 
-  List<Map<String, String>> loadDayEvents(DateTime day) {
+  List<Map<String, String>> loadEvents(DateTime day) {
     if (events.containsKey(DateFormat('yyyy-MM-dd').format(day))) {
       return events[DateFormat('yyyy-MM-dd').format(day)]!;
     } else {
-      return [];
+      return <Event>[];
     }
   }
 
